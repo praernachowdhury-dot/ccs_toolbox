@@ -1,3 +1,10 @@
+"""CCS EEG analysis utilities.
+
+The package exposes commonly used feature extraction, signal processing,
+file I/O, and plotting helpers while keeping specialised modules available
+under ``ccstools.<module>``.
+"""
+
 # CCS EEG Toolbox (ccstools)
 # (c) 2024 Arun Sasidharan
 
