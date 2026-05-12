@@ -1,6 +1,6 @@
 # CCS EEG Toolbox (ccstools)
 
-A Python toolbox for EEG analysis at the Center for Cognitive Sciences (CCS), NIMHANS. This toolbox provides functions for PSD estimation, aperiodic component extraction (FOOOF, IRASA), non-linear measures (entropy, fractal dimension), signal processing, and more.
+A Python toolbox for EEG analysis developed/curated, and used at the Centre for Consciousness Studies (CCS), NIMHANS. This toolbox provides functions for PSD estimation, aperiodic component extraction (FOOOF, IRASA), non-linear measures (entropy, fractal dimension), signal processing, and more.
 
 ## Features
 
