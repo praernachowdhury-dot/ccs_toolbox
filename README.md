@@ -49,6 +49,7 @@ ccstools/
 ## Author
 
 - **Arun Sasidharan** - NIMHANS, Bengaluru.
+- **Rahul Venugopal** - NIMHANS, Bengaluru.
 
 ## License
 
