@@ -48,3 +48,6 @@ dependencies = [
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["ccstools*"]
+
+[tool.setuptools.package-data]
+"ccstools.ccs_eeg" = ["resources/*", "resources/**/*"]

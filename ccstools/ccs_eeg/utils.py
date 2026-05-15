@@ -5,6 +5,7 @@ import os
 import matplotlib
 matplotlib.use('Agg') # Silence plot windows
 import matplotlib.pyplot as plt
+from importlib import resources
 
 def load_custom_montage(mat_file_path):
     """
@@ -18,12 +19,18 @@ def load_custom_montage(mat_file_path):
     """
     if not os.path.exists(mat_file_path):
         # Check in local resources folder
-        resource_dir = os.path.join(os.path.dirname(__file__), 'resources', 'resource_headplot')
-        local_path = os.path.join(resource_dir, os.path.basename(mat_file_path))
-        if os.path.exists(local_path):
-            mat_file_path = local_path
-        else:
-            raise FileNotFoundError(f"Montage file not found: {mat_file_path} (checked local resources too)")
+        resource_pkg = "ccstools.ccs_eeg.resources.resource_headplot"
+        fname = os.path.basename(mat_file_path)
+        
+        try:
+            if resources.is_resource(resource_pkg, fname):
+                with resources.path(resource_pkg, fname) as local_path:
+                    mat_file_path = str(local_path)
+            else:
+                raise FileNotFoundError(f"Montage file not found: {mat_file_path} (checked local resources too)")
+        except (ImportError, ModuleNotFoundError):
+            # Fallback if package structure is not as expected
+            raise FileNotFoundError(f"Montage file not found: {mat_file_path} (resources package not found)")
         
     try:
         mat = scipy.io.loadmat(mat_file_path, simplify_cells=True)

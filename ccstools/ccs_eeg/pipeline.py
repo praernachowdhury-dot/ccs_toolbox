@@ -4,6 +4,7 @@ import os
 import time
 import datetime
 import pandas as pd
+from importlib import resources
 from mne_icalabel import label_components
 from autoreject import AutoReject, Ransac
 
@@ -290,11 +291,15 @@ def run_ccs_pipeline(raw_input, output_dir=None, config=None):
                 
                 if not leadfield_path:
                     # Try to find in resources
-                    resource_dir = os.path.join(os.path.dirname(__file__), 'resources')
-                    default_leadfield = os.path.join(resource_dir, 'fsavLEADFIELD_4_GEDAI.mat')
-                    if os.path.exists(default_leadfield):
-                        print(f"Using default leadfield: {default_leadfield}")
-                        leadfield_path = default_leadfield
+                    resource_pkg = "ccstools.ccs_eeg.resources"
+                    fname = "fsavLEADFIELD_4_GEDAI.mat"
+                    try:
+                        if resources.is_resource(resource_pkg, fname):
+                            with resources.path(resource_pkg, fname) as local_path:
+                                print(f"Using default leadfield: {local_path}")
+                                leadfield_path = str(local_path)
+                    except (ImportError, ModuleNotFoundError):
+                        pass
                 
                 if not leadfield_path:
                     print("Warning: GEDAI step requested but leadfield path not provided and default not found. Skipping.")
