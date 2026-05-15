@@ -45,9 +45,16 @@ dependencies = [
 "Homepage" = "https://github.com/arunsasidharan84/ccs_toolbox"
 "Bug Tracker" = "https://github.com/arunsasidharan84/ccs_toolbox/issues"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["ccstools*"]
+[tool.setuptools]
+include-package-data = true
+packages = [
+    "ccstools",
+    "ccstools.ccs_eeg",
+    "ccstools.ccs_eeg.gedai",
+    "ccstools.ccs_eeg.resources",
+    "ccstools.ccs_eeg.resources.resource_headplot"
+]
 
 [tool.setuptools.package-data]
-"ccstools.ccs_eeg" = ["resources/*", "resources/**/*"]
+"ccstools.ccs_eeg.resources" = ["*.mat"]
+"ccstools.ccs_eeg.resources.resource_headplot" = ["*.mat", "*.csv"]
