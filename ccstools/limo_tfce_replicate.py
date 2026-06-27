@@ -1,6 +1,4 @@
 import numpy as np
-import scipy.io as sio
-from scipy.ndimage import label, binary_erosion
 
 def limo_findcluster_python(onoff, adjacency, minnbchan=2):
     """
@@ -57,12 +55,11 @@ def limo_tfce_python(data, adjacency, E=0.5, H=2, dh=0.1, minnbchan=1):
     adjacency: (n_channels, n_channels)
     minnbchan: minimum significant neighbors required (default=1 for sparse montages)
     """
-    # Match LIMO's increment logic exactly
     def compute_side(d):
-        if np.max(d) == 0:
+        if np.max(d) <= 0:
             return np.zeros_like(d)
             
-        data_range = np.max(d) - np.min(d)
+        data_range = np.max(d) # Note: we only care about max because min for TFCE integration is conceptually 0
         if data_range > 1:
             precision = round(data_range / dh)
             if precision > 200:
@@ -76,11 +73,13 @@ def limo_tfce_python(data, adjacency, E=0.5, H=2, dh=0.1, minnbchan=1):
             return np.zeros_like(d)
             
         tfce_acc = np.zeros_like(d)
-        # LIMO starts from min(d) and goes to max(d)
-        thresholds = np.arange(np.min(d), np.max(d) + increment, increment)
+        
+        # BUG FIX 2: TFCE integration MUST start near 0, not at min(d).
+        # We start at 'increment' to evaluate the first slice > 0.
+        thresholds = np.arange(increment, np.max(d) + increment, increment)
         
         for h in thresholds:
-            onoff = d > h
+            onoff = d >= h # Typically TFCE uses >= or > the threshold slice
             if not np.any(onoff): continue
             
             labels, num = limo_findcluster_python(onoff, adjacency, minnbchan)
@@ -94,12 +93,12 @@ def limo_tfce_python(data, adjacency, E=0.5, H=2, dh=0.1, minnbchan=1):
             tfce_acc += (extent_map**E) * (h**H) * increment
         return tfce_acc
 
-    # LIMO doesn't always split if data is mostly positive or negative?
-    # Actually, LIMO type 2 uses min(data) > 0 check (line 352)
-    if np.min(data) > 0:
-        return compute_side(data)
-    else:
-        # LIMO splits into positive and negative peaks
-        pos_data = np.where(data > 0, data, 0)
-        neg_data = np.where(data < 0, np.abs(data), 0)
-        return compute_side(pos_data) + compute_side(neg_data)
+    # BUG FIX 1: We don't need the `if np.min(data) > 0:` split. 
+    # It is mathematically safer and cleaner to just separate positive and negative tails always, 
+    # evaluate them, and subtract the negative tail to restore the sign.
+    
+    pos_data = np.where(data > 0, data, 0)
+    neg_data = np.where(data < 0, np.abs(data), 0)
+    
+    # Notice the MINUS sign here! This restores negative TFCE values for negative t-values.
+    return compute_side(pos_data) - compute_side(neg_data)
